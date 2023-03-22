@@ -2,32 +2,11 @@
  * Includes
  *
  **************************/
-#include <stdlib.h>
 #include <windows.h>
 #include "glut.h"
-#include "Graph.h"
+#include "graph.h"
 #include <stdio.h>
 #include <math.h>
-#include "evaluateur.h"
-#include "analyseur_syntaxique.h"
-#include "analyseur_lexical.h"
-void categorisation_erreur(int* erreur_pg) {
-    switch (*erreur_pg) {
-    case 101: printf("Erreur 101 : fonction inconnue\n"); break;
-    case 102: printf("Erreur 102 : caractère inconnu\n"); break;
-    case 200: printf("Erreur 200 : Parenthèse fermée manquante\n"); break;
-    case 201: printf("Erreur 201 : Parenthèse ouverte manquante\n"); break;
-    case 202: printf("Erreur 202 : Lexème non reconnu\n"); break;
-    case 204: printf("erreur 204 : Erreur de syntaxe\n"); break;
-    case 203: printf("Erreur 203 : Barre de valeur absolue manquante\n"); break;
-    case 300: printf("Erreur 300 : Division par 0\n"); break;
-    case 301: printf("Erreur 301 : Lexème non reconnu\n"); break;
-    case 302: printf("Erreur 302 : log(x) avec x<0\n"); break;
-    case 303: printf("Erreur 303 : sqrt(x) avec x<0\n"); break;
-    
-    }
-}
-
 
 int basculex = 1;
 int basculey = 1;
@@ -88,27 +67,36 @@ void myKey(int c)
             set_Zoom(1);
         }
     }
-
+    if (bascule_Menu == 1) {
+        if (c == 'c') {
+            if (get_toggle() == 1) {
+                set_toggle(0);
+            }
+            else { set_toggle(get_toggle() + 1); }
+        }
+    }
     if (c == 'm') {
-        bascule_Menu ^= 1;
+    bascule_Menu^= 1;
     }
 }
 
 
-void Draw(float x[], float y[]) {
+// affichage du graph, du menu (avec bascule_Menu) et des coordonnees du curseur
 
-    //tracé de la fonction
+void Draw(float x[], float y[]) {
+    
+   //tracé de la fonction
     setcolor(0.0F, 0.0F, 1.0F);
-    for (int i = 0; i < 99998; i++) {
+    for (int i = 0; i < 99; i++) {
         line(x[i], y[i], x[i + 1], y[i + 1]);
     }
-
+    
     //Affichage des Coordonnées du curseur
-    char valeurX0[100];
-    char valeurY0[100];
-    sprintf(valeurX0, "X=%f", get_X0());
+    char valeurX0[100]; 
+    char valeurY0[100];  
+    sprintf(valeurX0, "X=%f", get_X0()); 
     sprintf(valeurY0, "Y=%f", get_Y0());
-    setcolor(0, 0, 0);
+    setcolor(0,0,0);
     outtextxy(get_X0() + abs(get_B() - get_X0()) * 0.70, get_Y0() + abs(get_D() - get_Y0()) * 0.90, valeurX0);
     outtextxy(get_X0() + abs(get_B() - get_X0()) * 0.70, get_Y0() + abs(get_D() - get_Y0()) * 0.80, valeurY0);
 
@@ -119,13 +107,13 @@ void Draw(float x[], float y[]) {
         float Dy;
         Dx = Distance(get_X0(), get_B());
         Dy = Distance(get_Y0(), get_D());
+        setcolor(0.27F, 0.27F, 0.27F); 
+        bar(get_X0() - Dx * (1.9 / 5), get_Y0() - Dy * (3.1 / 5), get_X0() + Dx * (2.46 / 5), get_Y0() + Dy * (2.9 / 5)); 
+        setcolor(0.95F, 0.95F, 0.95F);
+        bar(get_X0() - Dx * (2.0/ 5), get_Y0() - Dy * (3.0/ 5), get_X0() + Dx * (2.4/ 5), get_Y0() + Dy * (3.0/ 5));
         setcolor(0.0F, 0.0F, 0.0F);
-        bar(get_X0() - Dx * (2.02 / 5), get_Y0() - Dy * (3.1 / 5), get_X0() + Dx * (2.5 / 5), get_Y0() + Dy * (3.02 / 5));
-        setcolor(1.0F, 1.0F, 1.0F);
-        bar(get_X0() - Dx * (2.0 / 5), get_Y0() - Dy * (3.0 / 5), get_X0() + Dx * (2.4 / 5), get_Y0() + Dy * (3.0 / 5));
-        setcolor(0.0F, 0.0F, 0.0F);
-        outtextxy(get_X0() - Dx * (2.0 / 5), get_Y0() + Dy * (3.2 / 5), "MENU");
-        outtextxy(get_X0() - Dx * (1.9 / 5), get_Y0() + Dy * (2.7 / 5), "COMMANDES :");
+        outtextxy(get_X0() - Dx*(2.0/5), get_Y0() + Dy * (3.2 / 5), "MENU");
+        outtextxy(get_X0() - Dx * (1.9 / 5), get_Y0() + Dy * (2.7 / 5), "COMMANDS :");
         outtextxy(get_X0() - Dx * (1.8 / 5), get_Y0() + Dy * (2.2 / 5), "z : up");
         outtextxy(get_X0() - Dx * (1.8 / 5), get_Y0() + Dy * (1.7 / 5), "s : down");
         outtextxy(get_X0() - Dx * (1.8 / 5), get_Y0() + Dy * (1.2 / 5), "q : left");
@@ -135,56 +123,14 @@ void Draw(float x[], float y[]) {
         outtextxy(get_X0() - Dx * (1.8 / 5), get_Y0() + Dy * (-0.3 / 5), "- : zoom out");
         outtextxy(get_X0() - Dx * (1.8 / 5), get_Y0() + Dy * (-0.8 / 5), "r : reset position");
         outtextxy(get_X0() - Dx * (1.8 / 5), get_Y0() + Dy * (-1.3 / 5), "m : menu");
-    }
+        outtextxy(get_X0() - Dx * (1.8 / 5), get_Y0() + Dy * (-1.8 / 5), "c : change cursor ");
+    }              
 }
-
-
-
 int main(int ac, char* av[])
 {
-    float borne_inf;
-    float borne_sup;
-    float pas;
-    float Tableau_a_afficher_fonction[100000];
-    float Tableau_a_afficher_variable[100000];
-    Arbre Arbre_a_evaluer;
-    //on initialise l'erreur qui sera un pointeur, elle pourra donc etre transmise hors des fonctions sans problème
-    int erreur = 0;
-    int* erreur_pg = &erreur;
-    char c[101];
-    printf("veuillez entrer la fonction que vous souhaitez visualiser \n");
-    fgets(c, 101, stdin);
-    c[strlen(c) - 1] = '\0'; //enlève le '\n'
-    typejeton* tab[100];
-    *tab = analyseur(c, erreur_pg);// on effectue l'analyse lexicale
-    if (*erreur_pg == 0) {
-        // on demande à l'utilisateur les bornes si il n'y a pas d'erreur
-        printf("Donnez a, la borne inferieure d'echantillonage de la fonction\n");
-        scanf("%f", &borne_inf);
-        printf("Donnez b, la borne superieure d'echantillonage de la fonction\n");
-        scanf("%f", &borne_sup);
-        pas = (borne_sup - borne_inf) / 100000;
-        printf("borne inf:%f\nborne sup:%f\npas:%f\n", borne_inf, borne_sup, pas);
-    }
-    if (*erreur_pg == 0) {
-        Arbre_a_evaluer = analyse_syntaxique(*tab, erreur_pg);
-    }
-    if (*erreur_pg == 0) {
-        int i = 0;
-        for (float x = borne_inf; x < borne_sup; x += pas) {
-            Tableau_a_afficher_fonction[i] = Eval(Arbre_a_evaluer, x, erreur_pg);
-            Tableau_a_afficher_variable[i] = x;
-            //printf("%f: %f \n", Tableau_a_afficher_variable[i], Tableau_a_afficher_fonction[i]);
-            i++;
-        }
-    }
-    if (*erreur_pg != 0) {
-        categorisation_erreur(erreur_pg);
-        return -1;
-    }
-    InitGraph(ac, av, "fonction", 1920, 1080, Draw, myKey, Tableau_a_afficher_variable, Tableau_a_afficher_fonction);
+    float x[100] = {-25, -24.5, -24.0, -23.5, -23.0, -22.5, -22.0, -21.5, -21.0, -20.5, -20.0, -19.5, -19.0, -18.5, -18.0, -17.5, -17.0, -16.5, -16.0, -15.5, -15.0, -14.5, -14.0, -13.5, -13.0, -12.5, -12.0, -11.5, -11.0, -10.5, -10.0, -9.5, -9.0, -8.5, -8.0, -7.5, -7.0, -6.5, -6.0, -5.5, -5.0, -4.5, -4.0, -3.5, -3.0, -2.5, -2.0, -1.5, -1.0, -0.5, 0.0, 0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0, 5.5, 6.0, 6.5, 7.0, 7.5, 8.0, 8.5, 9.0, 9.5, 10.0, 10.5, 11.0, 11.5, 12.0, 12.5, 13.0, 13.5, 14.0, 14.5, 15.0, 15.5, 16.0, 16.5, 17.0, 17.5, 18.0, 18.5, 19.0, 19.5, 20.0, 20.5, 21.0, 21.5, 22.0, 22.5, 23.0, 23.5, 24.0, 24.5};
+    float y[100] = { -15600, -14681.125, -13799.0, -12952.875, -12142.0, -11365.625, -10623.0, -9913.375, -9236.0, -8590.125, -7975.0, -7389.875, -6834.0, -6306.625, -5807.0, -5334.375, -4888.0, -4467.125, -4071.0, -3698.875, -3350.0, -3023.625, -2719.0, -2435.375, -2172.0, -1928.125, -1703.0, -1495.875, -1306.0, -1132.625, -975.0, -832.375, -704.0, -589.125, -487.0, -396.875, -318.0, -249.625, -191.0, -141.375, -100.0, -66.125, -39.0, -17.875, -2.0, 9.375, 17.0, 21.625, 24.0, 24.875, 25.0, 25.125, 26.0, 28.375, 33.0, 40.625, 52.0, 67.875, 89.0, 116.125, 150.0, 191.375, 241.0, 299.625, 368.0, 446.875, 537.0, 639.125, 754.0, 882.375, 1025.0, 1182.625, 1356.0, 1545.875, 1753.0, 1978.125, 2222.0, 2485.375, 2769.0, 3073.625, 3400.0, 3748.875, 4121.0, 4517.125, 4938.0, 5384.375, 5857.0, 6356.625, 6884.0, 7439.875, 8025.0, 8640.125, 9286.0, 9963.375, 10673.0, 11415.625, 12192.0, 13002.875, 13849.0, 14731.125 };
+    InitGraph(ac, av, "fonction", 1280, 720, Draw, myKey, x, y);
     return 0;
 
 }
-
-
